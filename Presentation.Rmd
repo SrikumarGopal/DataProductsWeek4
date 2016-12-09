@@ -1,0 +1,66 @@
+---
+title: "Greenhouse gases development in the Netherlands"
+author: "Tom van Dienst"
+date: "December 9, 2016"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+source("readData.R")
+
+gh <- readData()
+ghm <- meltdata(gh)
+
+
+```
+
+## Introduction
+
+The Dutch Central Bureau of Statistics has an overview of the development of greenhouse gases within the country.  
+
+To get insight into this data a Shiny app has been created where the user can view the development for different emission sources. 
+
+This presentation will present some of the more remarkable findings. 
+
+All code can be found in my Github repo at  
+https://github.com/Tothalvadi/DataProductsWeek4
+
+## Change in emissions between 1990 and 2015 expressed in percentage
+
+```{r}
+t  <- filter(ghm, Category == "Total", CategoryTitle == "Total", Year == 2015) %>%
+    mutate(change = lastval/firstval*100 -100, variable = substring(variable, 6) ) %>%
+    select(Emission = variable, Change = change, Measurement = group) %>%
+    filter(!Emission %in% c("VOSDoorVerbranding", "VOSDoorVerdamping"))
+
+t$Emission[t$Emission == "VOSTotaal"] <- "VOS"
+g  <- ggplot(data = t, aes(x=Emission, y = Change))
+g <- g + geom_bar(stat="identity", aes(fill=Measurement), position="dodge")+ coord_flip()
+g <- g + xlab("Emission type") + ylab("% changed between 1990 and 2015")
+print(g)
+```
+
+## Explanation
+
+From the previous slide we can make the first conclusions: 
+
+* Almost all emissions have dropped over the past 15 years with a few exceptions
+* NO2 (Nitrous Oxide) has actually increased! 
+* Although the amount per KG of fuel has stayed the same for CO2, the total has also increased
+* In general the efficiency (per kg of burned fuel) has increased but the total amount has increased
+* Most likely cause is the increase of emitters (more planes, trains and automobiles)
+
+## Specifics?
+
+Of course a total overview doesn't tell the whole story. It would be nice if you could get a more detailed overview per different source.
+
+And now you can! Just jump to the Shiny app and analyse to your heart's content! :) 
+
+Go to http://chartable.io/DataProducts/ and take a look!
+
+Thanks for reading my presentation!
+
+PS (It's my own server and not very fast, so give it some time to render :)
+
